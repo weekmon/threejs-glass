@@ -15,9 +15,11 @@ require("three/examples/js/postprocessing/ShaderPass.js");
 require("three/examples/js/postprocessing/UnrealBloomPass.js");
 require("three/examples/js/shaders/LuminosityHighPassShader.js");
 require("three/examples/js/shaders/CopyShader.js");
+require("three/examples/js/loaders/GLTFLoader.js");
 
 const Stats = require("stats-js");
 const { GUI } = require("dat.gui");
+var dragon;
 
 const settings = {
   animate: true,
@@ -76,8 +78,33 @@ const sketch = ({ context, canvas, width, height }) => {
   composer.addPass(renderPass);
   composer.addPass(bloomPass);
 
+  const light = new THREE.AmbientLight(0xffffff); // soft white light
+  scene.add(light);
   // Content
   // -------
+
+  new THREE.GLTFLoader().load("src/seed-3.glb", (gltf) => {
+    dragon = gltf.scene;
+
+    // Just copy the geometry from the loaded model
+    //const geometry2 = dragon.clone();
+
+    // Adjust geometry to suit our scene
+    // geometry2.rotateX(Math.PI / 2);
+    // geometry2.translate(0, -4, 0);
+
+    // Create a new mesh and place it in the scene
+    // const mesh = new THREE.Mesh(geometry2, material);
+    // mesh.position.set(1,1,1);
+    // mesh.scale.set(0.135, 0.135, 0.135);
+    //meshes.push(mesh);
+    scene.add(dragon);
+    dragon.scale.set(0.2, 0.2, 0.2);
+    dragon.position.set(0, -0.5, 0);
+    // Discard the model
+    // dragon.geometry.dispose();
+    // dragon.material.dispose();
+  });
 
   const textureLoader = new THREE.TextureLoader();
 
@@ -88,7 +115,7 @@ const sketch = ({ context, canvas, width, height }) => {
   bgMesh.position.set(0, 0, -1);
   scene.add(bgMesh);
 
-  const geometry = new THREE.RoundedBoxGeometry(1, 1, 1, 16, 0.2);
+  const geometry = new THREE.RoundedBoxGeometry(10, 1, 1, 16, 0.2);
 
   const hdrEquirect = new THREE.RGBELoader().load(
     "src/empty_warehouse_01_2k.hdr",
@@ -116,7 +143,7 @@ const sketch = ({ context, canvas, width, height }) => {
     clearcoatNormalScale: new THREE.Vector2(options.clearcoatNormalScale)
   });
 
-  const MESH_COUNT = 500;
+  const MESH_COUNT = 5;
   const mesh = new THREE.InstancedMesh(geometry, material, MESH_COUNT);
   scene.add(mesh);
 
@@ -128,7 +155,7 @@ const sketch = ({ context, canvas, width, height }) => {
       1.5 * (-1 + 2 * Math.random()),
       0.2 + (-1 + 2 * Math.random())
     );
-
+    //Array(2).position);
     const rotation = new THREE.Euler(
       Math.random() * Math.PI * 2,
       Math.random() * Math.PI * 2,
@@ -141,7 +168,7 @@ const sketch = ({ context, canvas, width, height }) => {
       Math.random() * 2 - 1
     );
 
-    const BASE_SCALE = 0.2;
+    const BASE_SCALE = 0.5;
     const scale = BASE_SCALE * (0.25 + 0.75 * Math.random());
 
     const rotateTime = 5 + 15 * Math.random();
